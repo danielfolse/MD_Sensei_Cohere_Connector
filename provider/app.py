@@ -17,7 +17,7 @@ def get_access_token() -> str | None:
         return authorization_header.removeprefix(BEARER_PREFIX)
     return None
 
-
+@app.route('/search')
 def search(body):
     try:
         data = provider.search(body["query"], get_access_token())
