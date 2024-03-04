@@ -3,7 +3,8 @@ import logging
 from connexion.exceptions import Unauthorized
 from flask import abort, request, current_app as app
 
-from . import UpstreamProviderError, provider
+from __init__ import UpstreamProviderError
+import provider
 
 logger = logging.getLogger(__name__)
 AUTHORIZATION_HEADER = "Authorization"
