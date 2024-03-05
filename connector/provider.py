@@ -92,58 +92,56 @@ def split_and_remove_stopwords(text: str):
 
 
 def request_credentials(access_token=None):
-    with app.app_context():
-        if service_account_info := app.config.get("SERVICE_ACCOUNT_INFO"):
-            logger.debug("Using service account credentials")
-            credentials = service_account.Credentials.from_service_account_info(
-                service_account_info, scopes=SCOPES
-            )
-            if credentials.expired or not credentials.valid:
-                credentials.refresh(Request())
+    if service_account_info := app.config.get("SERVICE_ACCOUNT_INFO"):
+        logger.debug("Using service account credentials")
+        credentials = service_account.Credentials.from_service_account_info(
+            service_account_info, scopes=SCOPES
+        )
+        if credentials.expired or not credentials.valid:
+            credentials.refresh(Request())
 
-            return credentials
-        elif access_token:
-            logger.debug("Using oauth credentials")
-            return Credentials(access_token)
-        else:
-            raise AssertionError("No service account or oauth credentials provided")
+        return credentials
+    elif access_token:
+        logger.debug("Using oauth credentials")
+        return Credentials(access_token)
+    else:
+        raise AssertionError("No service account or oauth credentials provided")
 
 
 def search(query, access_token=None):
-    with app.app_context():
-        service = build("drive", "v3", credentials=request_credentials(access_token))
+    service = build("drive", "v3", credentials=request_credentials(access_token))
 
-        # Google Drive's API search will attempt to match the search query exactly
-        # which leads to poor results. We split the query into words and remove stop words
-        # to improve the search results.
-        query_words = split_and_remove_stopwords(query)
+    # Google Drive's API search will attempt to match the search query exactly
+    # which leads to poor results. We split the query into words and remove stop words
+    # to improve the search results.
+    query_words = split_and_remove_stopwords(query)
 
-        conditions = [
-            "("
-            + " or ".join([f"mimeType = '{mime_type}'" for mime_type in SEARCH_MIME_TYPES])
-            + ")",
-            "("
-            + " or ".join([f"fullText contains '{word}'" for word in query_words])
-            + ")",
-        ]
+    conditions = [
+        "("
+        + " or ".join([f"mimeType = '{mime_type}'" for mime_type in SEARCH_MIME_TYPES])
+        + ")",
+        "("
+        + " or ".join([f"fullText contains '{word}'" for word in query_words])
+        + ")",
+    ]
 
-        if gdrive_folder_id := app.config.get("FOLDER_ID", None):
-            conditions.append(f"'{gdrive_folder_id}' in parents ")
+    if gdrive_folder_id := app.config.get("FOLDER_ID", None):
+        conditions.append(f"'{gdrive_folder_id}' in parents ")
 
-        q = " and ".join(conditions)
-        page_size = app.config.get("SEARCH_LIMIT", 10)
-        fields = f"nextPageToken, files({DOC_FIELDS})"
-        try:
-            search_results = (
-                service.files()
-                .list(
-                    pageSize=page_size,
-                    fields=fields,
-                    q=q,
-                )
-                .execute()
+    q = " and ".join(conditions)
+    page_size = app.config.get("SEARCH_LIMIT", 10)
+    fields = f"nextPageToken, files({DOC_FIELDS})"
+    try:
+        search_results = (
+            service.files()
+            .list(
+                pageSize=page_size,
+                fields=fields,
+                q=q,
             )
-        except HttpError as http_error:
-            raise UpstreamProviderError(message=str(http_error)) from http_error
+            .execute()
+        )
+    except HttpError as http_error:
+        raise UpstreamProviderError(message=str(http_error)) from http_error
 
-        return process_data_with_service(search_results, request_credentials(access_token))
+    return process_data_with_service(search_results, request_credentials(access_token))

@@ -1,14 +1,13 @@
 import logging
 
 from connexion.exceptions import Unauthorized
-from flask import abort, request#, current_app as app
+from flask import abort, request, current_app as app
 
 from connector import create_app, UpstreamProviderError, provider
 
 logger = logging.getLogger(__name__)
 AUTHORIZATION_HEADER = "Authorization"
 BEARER_PREFIX = "Bearer "
-
 app = create_app()
 
 def get_access_token() -> str | None:

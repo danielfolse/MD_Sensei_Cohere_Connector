@@ -22,7 +22,7 @@ class UpstreamProviderError(Exception):
         return self.message
 
 
-def create_app() -> connexion.FlaskApp:
+def create_app():
     app = connexion.FlaskApp(__name__, specification_dir="../.openapi")
     app.add_api(
         API_VERSION, resolver=connexion.resolver.RelativeResolver("connector.app")
