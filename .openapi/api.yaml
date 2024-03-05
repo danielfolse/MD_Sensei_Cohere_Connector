@@ -53,4 +53,4 @@ components:
     api_key:
       type: http
       scheme: bearer
-      x-bearerInfoFunc: connector.resolver.apikey_auth
+      x-bearerInfoFunc: provider.app.apikey_auth
