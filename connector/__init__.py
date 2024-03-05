@@ -24,9 +24,8 @@ class UpstreamProviderError(Exception):
 def create_app():
     app = connexion.FlaskApp(__name__, specification_dir="../.openapi")
     app.add_api(
-        API_VERSION)
-        #, resolver=connexion.resolver.RelativeResolver("connector.app")
-    #)
+        API_VERSION, resolver=connexion.resolver.RelativeResolver(".")
+    )
     logging.basicConfig(level=logging.INFO)
     flask_app = app.app
     config_prefix = "GDRIVE"
