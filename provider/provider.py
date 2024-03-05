@@ -8,8 +8,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from __init__ import UpstreamProviderError
-import async_download
+from . import UpstreamProviderError, async_download
 
 CSV_MIMETYPE = "text/csv"
 TEXT_MIMETYPE = "text/plain"
