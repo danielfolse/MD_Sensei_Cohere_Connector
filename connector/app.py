@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 AUTHORIZATION_HEADER = "Authorization"
 BEARER_PREFIX = "Bearer "
 
-app = create_app
+app = create_app()
 
 def get_access_token() -> str | None:
     authorization_header = request.headers.get(AUTHORIZATION_HEADER, "")
